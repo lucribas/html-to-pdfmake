@@ -20,6 +20,7 @@
  *   @param  {Array} [ignoreStyles=[]] An array of style property to ignore
  *   @param  {Function} [customTag] It permits to handle non-regular HTML tag
  *   @param  {Object} [window] The `window` object (required for NodeJS server side use)
+ *   @param  {Object} [dataStreams] Maps data-stream-id to readable streams for embedding large data via streams
  * @return {Object} it returns a PdfMake object
  *
  * @example
@@ -440,7 +441,12 @@ function htmlToPdfMake(htmlText, options) {
             break;
           }
           case "IMG": {
-            if (this.imagesByReference) {
+            var streamId = element.getAttribute("data-stream-id");
+            if (streamId && options.dataStreams && options.dataStreams[streamId]) {
+              console.log("Stream IMG detected! ", streamId)
+              ret.image = options.dataStreams[streamId];
+              // console.log(streamId,'=>',JSON.stringify(ret.image));
+            } else if (this.imagesByReference) {
               var src = element.getAttribute("data-src") || element.getAttribute("src");
               var index = this.imagesRef.indexOf(src);
               if (index>-1) ret.image = 'img_ref_'+index;

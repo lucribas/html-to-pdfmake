@@ -25,5 +25,8 @@
     "pdfmake": "github:lucribas/pdfmake#feature/use-image-streams",
     "simple-test-framework": "^0.1.7",
     "svg-to-pdfkit": "^0.1.8"
+  },
+  "dependencies": {
+    "deasync": "^0.1.30"
   }
 }
