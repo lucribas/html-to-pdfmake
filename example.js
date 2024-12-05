@@ -1,12 +1,22 @@
-var pdfMake = require("pdfmake/build/pdfmake");
-var pdfFonts = require("pdfmake/build/vfs_fonts");
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
-var fs = require("fs");
+var path = require("path");
 var jsdom = require("jsdom");
 var { JSDOM } = jsdom;
 var { window } = new JSDOM("");
 var htmlToPdfMake = require("./index.js");
-//var util = require("util");
+
+
+var fs = require("fs");
+var PdfPrinter = require('pdfmake/src/printer');
+var fonts = {
+    Roboto: {
+        normal: 'fonts/Roboto/Roboto-Regular.ttf',
+        bold: 'fonts/Roboto/Roboto-Medium.ttf',
+        italics: 'fonts/Roboto/Roboto-Italic.ttf',
+        bolditalics: 'fonts/Roboto/Roboto-MediumItalic.ttf'
+    }
+};
+var printer = new PdfPrinter(fonts);
+
 
 var html = htmlToPdfMake(`
   Simple text
@@ -265,7 +275,7 @@ var docDefinition = {
   }
 };
 
-var pdfDocGenerator = pdfMake.createPdf(docDefinition, {
+var pdfDocGenerator = printer.createPdfKitDocument(docDefinition, {
   // see https://pdfmake.github.io/docs/0.1/document-definition-object/tables/
   exampleLayout: {
     hLineColor: function (rowIndex, node, colIndex) {
@@ -275,10 +285,13 @@ var pdfDocGenerator = pdfMake.createPdf(docDefinition, {
     vLineColor: function (colIndex, node, rowIndex) {
       if (rowIndex === 0) return 'red';
       return rowIndex > 0 && (colIndex === 0 || colIndex === node.table.body[0].length) ? 'blue' : 'black';
-    }  
+    }
   }
 });
-pdfDocGenerator.getBuffer(function(buffer) {
-  fs.writeFileSync('example.pdf', buffer);
-  console.log('--> example.pdf')
+
+pdfDocGenerator.pipe(fs.createWriteStream('example.pdf')).on('finish',function(){
+	//success
 });
+pdfDocGenerator.end();
+console.log('--> example.pdf')
+

@@ -4,9 +4,11 @@ var jsdom = require("jsdom");
 var { JSDOM } = jsdom;
 var { window } = new JSDOM("");
 var htmlToPdfMake = require("./index.js");
+//var util = require("util");
+
+// stream support
 const { Readable } = require('stream');
 var deasync = require("deasync");
-//var util = require("util");
 
 const images = [
     './imgs/20211019-FanalMadeira_ROW0862209086_UHD.jpg',
@@ -1006,7 +1008,7 @@ async function main() {
   const _readSync = (filePath) => fs.readFileSync(filePath);
   // const _readSync = (filePath) => _readStreamSync(fs.createReadStream(filePath));
 
-  const createStream = (filePath) => {
+  const createImageFunction = (filePath) => {
     let reads = 0;
     return {
       read: function () {
@@ -1016,23 +1018,23 @@ async function main() {
     };
   };
 
-  const dataStreams = images.reduce((streams, filePath, index) => {
-      streams[`stream${index + 1}`] = createStream(filePath);
-      return streams;
+  const dataImages = images.reduce((dataImages, filePath, index) => {
+	dataImages[`image_${index + 1}`] = createImageFunction(filePath);
+      return dataImages;
   }, {});
-  console.log(dataStreams);
+  console.log(dataImages);
 
   let html_source = `
       Exemplo de PDF com ${images.length} imagens
   `;
 
   images.forEach((_, index) => {
-    const streamId = `stream${index + 1}`;
-    html_source += `    <img src="" data-stream-id="${streamId}" width="640" height="320" />\n`;
+    const imageId = `image_${index + 1}`;
+    html_source += `    <img src="" data-image-id="${imageId}" width="640" height="320" />\n`;
   });
 
   var html = htmlToPdfMake( html_source, {
-    dataStreams: dataStreams,
+    dataImages: dataImages,
     window: window, tableAutoSize: true } );
 //   console.log(JSON.stringify(html));
 
