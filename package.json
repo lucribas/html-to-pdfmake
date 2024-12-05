@@ -22,7 +22,7 @@
   "devDependencies": {
     "eslint": "^5.16.0",
     "jsdom": "^16.6.0",
-    "pdfmake": "github:lucribas/pdfmake#feature/use-image-streams",
+    "pdfmake": "github:lucribas/pdfmake#feat/use-image-streams-async",
     "simple-test-framework": "^0.1.7",
     "svg-to-pdfkit": "^0.1.8"
   },

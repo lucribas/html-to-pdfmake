@@ -1030,7 +1030,7 @@ async function main() {
 
   images.forEach((_, index) => {
     const imageId = `image_${index + 1}`;
-    html_source += `    <img src="" data-image-id="${imageId}" width="640" height="320" />\n`;
+    html_source += `    <img data-image-id="${imageId}" width="640" height="320" />\n`;
   });
 
   var html = htmlToPdfMake( html_source, {
