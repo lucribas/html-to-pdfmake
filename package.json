@@ -23,6 +23,7 @@
     "eslint": "^5.16.0",
     "jsdom": "^16.6.0",
     "pdfmake": "github:lucribas/pdfmake#feat/use-image-streams-async",
+	"@foliojs-fork/pdfkit": "github:lucribas/pdfkit#feature/image-stream-support",
     "simple-test-framework": "^0.1.7",
     "svg-to-pdfkit": "^0.1.8"
   },

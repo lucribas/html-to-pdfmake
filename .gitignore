@@ -2,7 +2,7 @@
 node_modules
 /dist
 imgs/
-package-lock.json
+BingWallpaper
 
 # local env files
 .env.local
@@ -24,3 +24,5 @@ yarn-error.log*
 *.pdf
 *.png
 *.jpg
+*.zst
+
