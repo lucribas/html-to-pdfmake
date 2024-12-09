@@ -14,18 +14,23 @@ var deasync = require("deasync");
 var fs = require("fs");
 var PdfPrinter = require('pdfmake/src/printer');
 var fonts = {
-	Roboto: {
-		normal: 'fonts/Roboto/Roboto-Regular.ttf',
-        bold: 'fonts/Roboto/Roboto-Medium.ttf',
-        italics: 'fonts/Roboto/Roboto-Italic.ttf',
-        bolditalics: 'fonts/Roboto/Roboto-MediumItalic.ttf'
+  Roboto: {
+    normal: './fonts/Roboto/Roboto-Regular.ttf',
+        bold: './fonts/Roboto/Roboto-Medium.ttf',
+        italics: './fonts/Roboto/Roboto-Italic.ttf',
+        bolditalics: './fonts/Roboto/Roboto-MediumItalic.ttf'
     }
 };
-var printer = new PdfPrinter(fonts);
+var pdfPrinter = new PdfPrinter(fonts);
 
-var { IMAGES } = require('./example_img_list.js');
+// var { IMAGES } = require('./example_img_list.js');
+var { IMAGES } = require('./example_img_list_full.js');
 
 main();
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function _readStreamSync(stream) {
   let done = false;
@@ -60,6 +65,8 @@ function _readStream(stream) {
 
 async function main() {
 
+  console.time("time_mark");
+
   const _readSync = (filePath) => fs.readFileSync(filePath);
   // const _readSync = (filePath) => _readStreamSync(fs.createReadStream(filePath));
 
@@ -74,10 +81,10 @@ async function main() {
   };
 
   const dataImages = IMAGES.reduce((dataImages, filePath, index) => {
-	dataImages[`image_${index + 1}`] = createImageFunction(filePath);
+  dataImages[`image_${index + 1}`] = createImageFunction(filePath);
       return dataImages;
   }, {});
-  console.log(dataImages);
+  // console.log(dataImages);
 
   let html_source = `
       Exemplo de PDF com ${IMAGES.length} imagens
@@ -88,6 +95,12 @@ async function main() {
     html_source += `    <img data-image-id="${imageId}" width="640" height="320" />\n`;
   });
 
+
+  console.log('htmlToPdfMake...')
+  console.timeLog("time_mark");
+
+
+//   console.log(html_source);
   var html = htmlToPdfMake( html_source, {
     dataImages: dataImages,
     window: window, tableAutoSize: true } );
@@ -132,11 +145,30 @@ async function main() {
       }
     }
   };
-
+//   docDefinition = {
+// 	content: [
+// 		'First paragraph',
+// 		'Another paragraph, this time a little bit longer to make sure, this line will be divided into at least two lines'
+// 	]
+// };
     const initialMemory = process.memoryUsage().heapUsed;
     console.log(`Memória inicial: ${(initialMemory / 1024 / 1024).toFixed(2)} MB`);
 
-  var pdfDocGenerator = printer.createPdfKitDocument(docDefinition, {
+ console.timeLog("time_mark", 'start createPdfKitDocument...');
+
+ let lastProgress = null;
+ progressCallback = function(progressData) {
+  progress = (progressData*100).toFixed(0);
+  if ((progress % 10 == 0) && (lastProgress != progress)) {
+    lastProgress = progress;
+    console.log(`Progresso Rendering: ${progress}%`);
+  }
+ }
+
+
+ var pdfDoc = await pdfPrinter.createPdfKitDocument(docDefinition, {
+    progressCallback: progressCallback,
+    bufferPages: false,
     // see https://pdfmake.github.io/docs/0.1/document-definition-object/tables/
     exampleLayout: {
       hLineColor: function (rowIndex, node, colIndex) {
@@ -150,12 +182,21 @@ async function main() {
     }
   });
 
-  pdfDocGenerator.pipe(fs.createWriteStream('example_img_stream2.pdf')).on('finish',function(){
+  // console.log('Sleep 10s...')
+  // console.timeLog("time_mark");
+  // await sleep(10000);
+
+  console.timeLog("time_mark", 'Open pipe...');
+  await pdfDoc.pipe(fs.createWriteStream('example_img_stream3.pdf')).on('finish',function(){
+    console.timeLog("time_mark", 'pipe finished');
       //success
   });
-  pdfDocGenerator.end();
 
-  console.log('--> example_img_stream2.pdf')
+  await pdfDoc.end();
+  console.timeLog("time_mark", 'end() finished');
+
+  console.log('--> example_img_stream3.pdf')
+  console.timeLog("time_mark");
 
 
     const finalMemory = process.memoryUsage().heapUsed;
