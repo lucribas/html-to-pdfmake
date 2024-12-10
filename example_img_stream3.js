@@ -4,13 +4,8 @@ var jsdom = require("jsdom");
 var { JSDOM } = jsdom;
 var { window } = new JSDOM("");
 var htmlToPdfMake = require("./index.js");
-//var util = require("util");
-
-// stream support
 const { Readable } = require('stream');
 var deasync = require("deasync");
-
-
 var fs = require("fs");
 var PdfPrinter = require('pdfmake/src/printer');
 var fonts = {
@@ -22,51 +17,12 @@ var fonts = {
     }
 };
 var pdfPrinter = new PdfPrinter(fonts);
-
-// var { IMAGES } = require('./example_img_list.js');
 var { IMAGES } = require('./example_img_list_full.js');
 
 main();
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function _readStreamSync(stream) {
-  let done = false;
-  let result = null;
-  let error = null;
-
-  _readStream(stream)
-    .then((data) => {
-      result = data;
-      done = true;
-    })
-    .catch((err) => {
-      error = err;
-      done = true;
-    });
-  deasync.loopWhile(() => !done);
-  if (error) {
-    throw error;
-  }
-  return result;
-}
-
-function _readStream(stream) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    stream.on('data', (chunk) => chunks.push(chunk));
-    stream.on('end', () => resolve(Buffer.concat(chunks)));
-    stream.on('error', reject);
-  });
-}
-
-
 async function main() {
-
   console.time("time_mark");
-
   const _readSync = (filePath) => fs.readFileSync(filePath);
   // const _readSync = (filePath) => _readStreamSync(fs.createReadStream(filePath));
 
@@ -84,7 +40,6 @@ async function main() {
   dataImages[`image_${index + 1}`] = createImageFunction(filePath);
       return dataImages;
   }, {});
-  // console.log(dataImages);
 
   let html_source = `
       Exemplo de PDF com ${IMAGES.length} imagens
@@ -95,16 +50,10 @@ async function main() {
     html_source += `    <img data-image-id="${imageId}" width="640" height="320" />\n`;
   });
 
-
-  console.log('htmlToPdfMake...')
-  console.timeLog("time_mark");
-
-
-//   console.log(html_source);
+  console.timeLog("time_mark, 'htmlToPdfMake...");
   var html = htmlToPdfMake( html_source, {
     dataImages: dataImages,
     window: window, tableAutoSize: true } );
-//   console.log(JSON.stringify(html));
 
   var docDefinition = {
     content: [
@@ -145,15 +94,6 @@ async function main() {
       }
     }
   };
-//   docDefinition = {
-// 	content: [
-// 		'First paragraph',
-// 		'Another paragraph, this time a little bit longer to make sure, this line will be divided into at least two lines'
-// 	]
-// };
-    const initialMemory = process.memoryUsage().heapUsed;
-    console.log(`Memória inicial: ${(initialMemory / 1024 / 1024).toFixed(2)} MB`);
-
  console.timeLog("time_mark", 'start createPdfKitDocument...');
 
  let lastProgress = null;
@@ -165,11 +105,9 @@ async function main() {
   }
  }
 
-
  var pdfDoc = await pdfPrinter.createPdfKitDocument(docDefinition, {
     progressCallback: progressCallback,
     bufferPages: false,
-    // see https://pdfmake.github.io/docs/0.1/document-definition-object/tables/
     exampleLayout: {
       hLineColor: function (rowIndex, node, colIndex) {
         if (rowIndex === node.table.body.length) return 'blue';
@@ -182,35 +120,13 @@ async function main() {
     }
   });
 
-  // console.log('Sleep 10s...')
-  // console.timeLog("time_mark");
-  // await sleep(10000);
-
   console.timeLog("time_mark", 'Open pipe...');
   await pdfDoc.pipe(fs.createWriteStream('example_img_stream3.pdf')).on('finish',function(){
     console.timeLog("time_mark", 'pipe finished');
-      //success
   });
-
   await pdfDoc.end();
+
   console.timeLog("time_mark", 'end() finished');
-
-  console.log('--> example_img_stream3.pdf')
-  console.timeLog("time_mark");
-
-
-    const finalMemory = process.memoryUsage().heapUsed;
-    console.log(`Memória final: ${(finalMemory / 1024 / 1024).toFixed(2)} MB`);
-    console.log(
-        `Memória máxima usada: ${((finalMemory - initialMemory) / 1024 / 1024).toFixed(2)} MB`
-    );
-
-
-//   pdfDocGenerator.getBuffer(function(buffer) {
-//     fs.writeFileSync('example_img_stream2.pdf', buffer);
-//     console.log('--> example_img_stream2.pdf')
-//   });
-
 }
 
 function base64ToStream(base64) {
