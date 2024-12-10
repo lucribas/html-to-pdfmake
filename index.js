@@ -442,18 +442,21 @@ function htmlToPdfMake(htmlText, options) {
           }
           case "IMG": {
             var imageId = element.getAttribute("data-image-id");
-            if (imageId && options.dataImages && options.dataImages[imageId]) {
-              ret.image = options.dataImages[imageId];
-            } else if (this.imagesByReference) {
-              var src = element.getAttribute("data-src") || element.getAttribute("src");
-              var index = this.imagesRef.indexOf(src);
-              if (index>-1) ret.image = 'img_ref_'+index;
-              else {
-                ret.image = 'img_ref_'+this.imagesRef.length;
-                this.imagesRef.push(src);
+            if (imageId && options.dataImages) {
+              ret.image = options.dataImages.get(imageId);
+            }
+            if (!ret.image) {
+              if (this.imagesByReference) {
+                var src = element.getAttribute("data-src") || element.getAttribute("src");
+                var index = this.imagesRef.indexOf(src);
+                if (index>-1) ret.image = 'img_ref_'+index;
+                else {
+                  ret.image = 'img_ref_'+this.imagesRef.length;
+                  this.imagesRef.push(src);
+                }
+                } else {
+                ret.image = element.getAttribute("src");
               }
-            } else {
-              ret.image = element.getAttribute("src");
             }
             delete ret.stack;
             delete ret.text;
@@ -620,34 +623,34 @@ function htmlToPdfMake(htmlText, options) {
     if (cssClass.length>0) params.ret.style = cssClass;
     return params.ret;
   }
-	
-	/**
-	 * Border Value Rearrange a CSS expression (e.g. 'border:solid 10px red' to 'border:10px solid red')
-	 *
-	 * @param {String} styleStr The CSS expression values
-	 * @returns {String} border value in global accepted format (e.g. 'border:10px solid red')
-	 */
-	this.borderValueRearrange = function(styleStr) {
-		try {
-			var styleArray = styleStr.split(' ');
+  
+  /**
+   * Border Value Rearrange a CSS expression (e.g. 'border:solid 10px red' to 'border:10px solid red')
+   *
+   * @param {String} styleStr The CSS expression values
+   * @returns {String} border value in global accepted format (e.g. 'border:10px solid red')
+   */
+  this.borderValueRearrange = function(styleStr) {
+    try {
+      var styleArray = styleStr.split(' ');
       if (styleArray.length!==3) return styleStr;
-			var v1 = "0px", v2 = "none", v3 = "transparent";
-			var style = ["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset", "none", "hidden", "mix"];
-			styleArray.forEach(function (v) {
-				if (v.match(/^\d/)) {
-					v1 = v;
-				} else if (style.indexOf(v) > -1) {
-					v2 = v;
-				} else {
-					v3 = v;
-				}
-			});
-			return v1 + ' ' + v2 + ' ' + v3;
-		} catch (e) {
-			return styleStr;
-		}
-	}
-	
+      var v1 = "0px", v2 = "none", v3 = "transparent";
+      var style = ["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset", "none", "hidden", "mix"];
+      styleArray.forEach(function (v) {
+        if (v.match(/^\d/)) {
+          v1 = v;
+        } else if (style.indexOf(v) > -1) {
+          v2 = v;
+        } else {
+          v3 = v;
+        }
+      });
+      return v1 + ' ' + v2 + ' ' + v3;
+    } catch (e) {
+      return styleStr;
+    }
+  }
+  
   /**
    * Transform a CSS expression (e.g. 'margin:10px') in the PDFMake version
    *
@@ -736,14 +739,14 @@ function htmlToPdfMake(htmlText, options) {
               break;
             }
             case "font-family": {
-							ret.push({
-								key: "font", value: value.split(',')[0].replace(/"|^'|^\s*|\s*$|'$/g, "").replace(/^([a-z])/g, function (g) {
-									return g[0].toUpperCase();
-								}).replace(/ ([a-z])/g, function (g) {
-									return g[1].toUpperCase();
-								})
-							});
-							break;
+              ret.push({
+                key: "font", value: value.split(',')[0].replace(/"|^'|^\s*|\s*$|'$/g, "").replace(/^([a-z])/g, function (g) {
+                  return g[0].toUpperCase();
+                }).replace(/ ([a-z])/g, function (g) {
+                  return g[1].toUpperCase();
+                })
+              });
+              break;
             }
             case "color": {
               ret.push({key:"color", value:_this.parseColor(value)})
@@ -792,7 +795,7 @@ function htmlToPdfMake(htmlText, options) {
       var borderColor = []; // array of colors
       borders.forEach(function(b) {
         // we have 3 properties: width style color
-				b.value = _this.borderValueRearrange(b.value);
+        b.value = _this.borderValueRearrange(b.value);
         var properties = b.value.split(' ');
         var width = properties[0].replace(/(\d*)(\.\d+)?([^\d]+)/g,"$1$2 ").trim();
         var index = -1, i;
