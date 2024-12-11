@@ -422,7 +422,7 @@ function htmlToPdfMake(htmlText, options) {
               case 'I': ret.type = 'upper-roman'; break;
               case 'i': ret.type = 'lower-roman'; break;
             }
-            
+
             // check if we have `list-style-type` or `list-style`
             if (ret.listStyle || ret.listStyleType) ret.type = ret.listStyle || ret.listStyleType;
             break;
@@ -443,7 +443,7 @@ function htmlToPdfMake(htmlText, options) {
           case "IMG": {
             var imageId = element.getAttribute("data-image-id");
             if (imageId && options.dataImages) {
-              ret.image = options.dataImages.get(imageId);
+				ret.image = options.dataImages.get(imageId);
             }
             if (!ret.image) {
               if (this.imagesByReference) {

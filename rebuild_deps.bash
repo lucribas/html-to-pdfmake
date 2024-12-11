@@ -1,5 +1,22 @@
 
 
+# problema
+o package-log.json gerado faz algumas referencias ap pdfkit no repo antigo, tem q arrumar manualmente
+
+#-- certifique-se
+em casa subprojeto
+de apagar
+rm -rf package-lock.json node_modules/
+npm install
+npm run build
+#adicionar o que mudou
+git add . 
+git commit --amend
+git push --force
+
+
+## PASSO A PASSO
+
 # se alterar o pdfkit
 cd ../pdfkit
 
