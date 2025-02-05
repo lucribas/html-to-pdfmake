@@ -20,13 +20,13 @@
   },
   "homepage": "https://github.com/Aymkdn/html-to-pdfmake#readme",
   "dependencies": {
-    "svg-to-pdfkit": "^0.1.8",
     "@foliojs-fork/pdfkit": "github:lucribas/pdfkit#feat/use-image-streams-sync",
-    "pdfkit": "github:lucribas/pdfkit#feat/use-image-streams-sync",
-    "pdfmake": "github:lucribas/pdfmake#feat/use-image-streams-sync",
     "@types/node": "^22.10.1",
     "eslint": "^5.16.0",
     "jsdom": "^16.6.0",
-    "simple-test-framework": "^0.1.7"
+    "pdfkit": "github:lucribas/pdfkit#feat/use-image-streams-sync",
+    "pdfmake": "github:lucribas/pdfmake#feat/use-image-streams-sync",
+	"simple-test-framework": "https://github.com/lucribas/html-to-pdfmake/raw/refs/heads/feat/image-streams-integration-sync/package_missing/simple-test-framework-0.1.7.tgz",
+    "svg-to-pdfkit": "^0.1.8"
   }
 }
